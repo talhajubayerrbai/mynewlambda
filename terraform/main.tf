@@ -93,6 +93,12 @@ resource "aws_lambda_function" "app" {
 
 # ---------------------------------------------------------------------------
 # Lambda Function URL (public, no auth)
+#
+# authorization_type = "NONE" causes AWS to automatically grant public
+# invocation access via a resource-based policy. A separate
+# aws_lambda_permission resource for principal "*" is NOT needed and
+# will cause an InvalidParameterValue API error — so it is intentionally
+# absent here.
 # ---------------------------------------------------------------------------
 
 resource "aws_lambda_function_url" "app" {
@@ -104,18 +110,6 @@ resource "aws_lambda_function_url" "app" {
     allow_methods = ["*"]
     allow_headers = ["*"]
   }
-}
-
-resource "aws_lambda_permission" "allow_function_url" {
-  statement_id           = "AllowPublicFunctionURL"
-  action                 = "lambda:InvokeFunctionUrl"
-  function_name          = aws_lambda_function.app.function_name
-  principal              = "*"
-  function_url_auth_type = "NONE"
-
-  # Ensure the function URL is fully created before applying this permission,
-  # so the resource-based policy is correctly associated with auth_type = NONE.
-  depends_on = [aws_lambda_function_url.app]
 }
 
 # ---------------------------------------------------------------------------
