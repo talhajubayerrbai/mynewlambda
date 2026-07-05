@@ -112,6 +112,10 @@ resource "aws_lambda_permission" "allow_function_url" {
   function_name          = aws_lambda_function.app.function_name
   principal              = "*"
   function_url_auth_type = "NONE"
+
+  # Ensure the function URL is fully created before applying this permission,
+  # so the resource-based policy is correctly associated with auth_type = NONE.
+  depends_on = [aws_lambda_function_url.app]
 }
 
 # ---------------------------------------------------------------------------
