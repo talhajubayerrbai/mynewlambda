@@ -91,14 +91,16 @@ jobs:
         working-directory: terraform
         run: |
           FUNCTION_URL=$(terraform output -raw function_url)
+          # Strip any trailing slash so we can append paths consistently
+          FUNCTION_URL="${FUNCTION_URL%/}"
           echo "function_url=${FUNCTION_URL}" >> "$GITHUB_OUTPUT"
 
       - name: Smoke test - verify app is reachable
         run: |-
           FUNCTION_URL="${{ steps.get_url.outputs.function_url }}"
-          echo "Hitting: ${FUNCTION_URL}health/"
+          echo "Hitting: ${FUNCTION_URL}/health/"
           for i in $(seq 1 10); do
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${FUNCTION_URL}health/")
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${FUNCTION_URL}/health/")
             echo "Attempt ${i}: HTTP ${HTTP_STATUS}"
             if echo "${HTTP_STATUS}" | grep -qE '^[23][0-9]{2}$'; then
               echo "Smoke test passed with HTTP ${HTTP_STATUS}"
