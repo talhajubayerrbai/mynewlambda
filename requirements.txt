@@ -4,3 +4,4 @@ gunicorn
 python-dotenv
 mangum
 pydantic
+aiofiles
